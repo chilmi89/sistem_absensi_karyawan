@@ -1,0 +1,36 @@
+/* Bungkus logo dengan ring animasi */
+
+
+/* Logo tetap berputar */
+.logo {
+    display: block;
+    border-radius: 50%;
+}
+
+/* Keyframes animasi RGB */
+@keyframes rgb-ring {
+    0%   { border-color: red; }
+    16%  { border-color: orange; }
+    33%  { border-color: yellow; }
+    50%  { border-color: green; }
+    66%  { border-color: blue; }
+    83%  { border-color: indigo; }
+    100% { border-color: violet; }
+}
+
+
+.application-logo {
+    width: 150px;
+    height: 120px;
+    animation: spin 3s linear infinite;
+}
+
+/* Animasi putar custom (mirip animate-spin Tailwind) */
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}

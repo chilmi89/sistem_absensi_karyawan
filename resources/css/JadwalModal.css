@@ -1,0 +1,75 @@
+/* Border RGB di modal */
+.rgb-border {
+    position: relative;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    padding: 1px;
+    background: linear-gradient(
+        270deg,
+        red,
+        orange,
+        yellow,
+        lime,
+        cyan,
+        blue,
+        magenta,
+        red
+    );
+    background-size: 800% 800%;
+    animation: rgbBorder 8s linear infinite;
+}
+
+.rgb-border > .modal-content {
+    border-radius: 0.5rem;
+    background-color: #1f2937; /* bg-gray-900 */
+    padding: 1.5rem;
+    color: white;
+}
+
+/* Animasi border modal */
+@keyframes rgbBorder {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* Efek RGB saat input hover & focus */
+/* Fokus warna berbeda tiap input */
+/* Efek RGB saat input hover saja */
+/* Warna berbeda tiap jenis input */
+.input-tanggal:hover {
+    border: 2px solid #3b82f6; /* biru */
+    box-shadow: 0 0 8px #3b82f6;
+}
+
+.input-jam-mulai:hover {
+    border: 2px solid #10b981; /* hijau */
+    box-shadow: 0 0 8px #10b981;
+}
+
+.input-jam-selesai:hover {
+    border: 2px solid #ef4444; /* merah */
+    box-shadow: 0 0 8px #ef4444;
+}
+
+.input-keterangan:hover {
+    border: 2px solid #facc15; /* kuning */
+    box-shadow: 0 0 8px #facc15;
+}
+
+/* Tetap rapi saat hover */
+.input-tanggal,
+.input-jam-mulai,
+.input-jam-selesai,
+.input-keterangan {
+    border: 1px solid #374151; /* gray-700 */
+    transition: all 0.3s ease;
+}
+
+
