@@ -23,7 +23,7 @@ const Navbar = ({ isOpen, setIsOpen, onSidebarHover, onSidebarLeave }) => {
                     <div className="flex items-center gap-2">
                         <ApplicationLogo className="w-6 h-6" />
                         <span className="text-lg font-bold text-lime-400">
-                            <span className="text-orange-600">C</span>-Recapt
+                            <span className="text-lime-400  ">C</span>-Recapt
                         </span>
                     </div>
                 </div>

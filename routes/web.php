@@ -19,13 +19,10 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
 Route::get('/', function () {
     return Inertia::render('Home');
 });
-
 // Home (auth)
 Route::get('/home', function () {
     return Inertia::render('Home');
 })->middleware(['auth'])->name('Home');
-
-
 
 // Dashboard (auth + verified)
 Route::get('/dashboard', function () {
@@ -40,8 +37,6 @@ Route::middleware('auth')->group(function () {
 });
 
 
-
-
 // Admin routes
 Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin/personality', [KaryawanController::class, 'index'])->name('karyawan.index');
@@ -49,8 +44,6 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::put('/admin/personality/{user}', [KaryawanController::class, 'update'])->name('karyawan.update');
     Route::delete('/admin/personality/{id}', [KaryawanController::class, 'destroy'])->name('karyawan.destroy');
 });
-
-
 
 
 Route::post('/admin/karyawan/preview-qrcode', [KaryawanController::class, 'previewQr'])->name('karyawan.preview-qr');

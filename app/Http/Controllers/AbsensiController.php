@@ -6,7 +6,6 @@ use App\Models\Absensi;
 use App\Models\JadwalAbsensi;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class AbsensiController extends Controller
@@ -15,29 +14,30 @@ class AbsensiController extends Controller
      * Scan QR Code untuk absen
      * Endpoint: POST /absensi/scan
      */
-
-    
     public function scan(Request $request)
     {
+        // Validasi request
         $request->validate([
             'token' => 'required|string',
+            'tanggal' => 'nullable|date', // tanggal opsional dari admin
         ]);
 
         // Cari user berdasarkan qr_token
         $user = User::where('qr_token', $request->token)->first();
-
         if (!$user) {
             return response()->json([
-                'message' => 'QR code tidak valid'
-            ], 404);
+                'message' => 'QR code tidak valid',
+            ], 400);
         }
 
-        // Ambil jadwal absensi hari ini
-        $jadwalHariIni = JadwalAbsensi::whereDate('tanggal', now()->format('Y-m-d'))->first();
+        // Ambil tanggal yang dikirim admin, jika tidak ada gunakan hari ini
+        $tanggalAbsensi = $request->tanggal ?? now()->toDateString();
 
+        // Ambil jadwal absensi sesuai tanggal
+        $jadwalHariIni = JadwalAbsensi::where('tanggal', $tanggalAbsensi)->first();
         if (!$jadwalHariIni) {
             return response()->json([
-                'message' => 'Belum ada jadwal absensi hari ini'
+                'message' => 'Belum ada jadwal absensi untuk tanggal ini',
             ], 400);
         }
 
@@ -45,65 +45,68 @@ class AbsensiController extends Controller
         $absensi = Absensi::firstOrCreate(
             [
                 'user_id' => $user->id,
-                'absensi_jadwal_id' => $jadwalHariIni->id
+                'absensi_jadwal_id' => $jadwalHariIni->id,
             ],
             [
                 'status' => 'Hadir',
-                'waktu_scan' => now()
+                'waktu_scan' => now(),
             ]
         );
 
-        // Kembalikan data absensi terbaru ke frontend
         return response()->json([
             'message' => 'Absensi berhasil!',
             'data' => [
                 'id' => $absensi->id,
                 'nama' => $user->name,
-                'divisi' => $user->getRoleNames()->first() ?? '-', // role Spatie sebagai divisi
+                'divisi' => $user->getRoleNames()->first() ?? '-',
                 'tanggal' => $jadwalHariIni->tanggal,
                 'jamMasuk' => $jadwalHariIni->jam_mulai,
                 'jamPulang' => $jadwalHariIni->jam_selesai,
                 'status' => $absensi->status,
-                'waktu_scan' => $absensi->waktu_scan
-            ]
+                'waktu_scan' => $absensi->waktu_scan,
+            ],
         ], 200);
     }
 
-    public function index(Request $request)
+    /**
+     * Ambil semua data absensi untuk tabel
+     * Endpoint: GET /absensi
+     */
+    public function index()
     {
-        // Ambil semua tanggal jadwal admin (unik, untuk dropdown)
-        $availableDates = \App\Models\JadwalAbsensi::orderBy('tanggal', 'asc')
-            ->pluck('tanggal')
-            ->unique()
-            ->values();
+        try {
+            $absensi = Absensi::with(['user', 'absensiJadwal'])
+                ->orderBy('waktu_scan', 'desc')
+                ->get();
 
-        // Ambil absensi user jika sudah ada
-        $query = \App\Models\Absensi::with(['user', 'absensiJadwal'])->orderBy('waktu_scan', 'desc');
-
-        if ($request->has('tanggal') && $request->tanggal) {
-            $query->whereHas('absensiJadwal', function ($q) use ($request) {
-                $q->whereDate('tanggal', $request->tanggal);
+            $data = $absensi->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'nama' => optional($item->user)->name ?? '-',
+                    'divisi' => optional($item->user)->getRoleNames()->first() ?? '-',
+                    'tanggal' => optional($item->absensiJadwal)->tanggal ?? '-',
+                    'jamMasuk' => optional($item->absensiJadwal)->jam_mulai ?? '-',
+                    'jamPulang' => optional($item->absensiJadwal)->jam_selesai ?? '-',
+                    'status' => $item->status ?? '-',
+                    'waktu_scan' => $item->waktu_scan ?? '-',
+                ];
             });
+
+            // Ambil daftar tanggal unik untuk dropdown filter di frontend
+            $availableDates = JadwalAbsensi::orderBy('tanggal', 'desc')
+                ->pluck('tanggal')
+                ->unique()
+                ->values();
+
+            return response()->json([
+                'data' => $data,
+                'availableDates' => $availableDates,
+            ], 200);
+        } catch (\Throwable $th) {
+            Log::error('AbsensiController@index error: ' . $th->getMessage());
+            return response()->json([
+                'error' => 'Terjadi kesalahan server: ' . $th->getMessage()
+            ], 500);
         }
-
-        $absensi = $query->get();
-
-        $data = $absensi->map(function ($item) {
-            return [
-                'id' => $item->id,
-                'nama' => $item->user->name ?? '-',
-                'divisi' => $item->user->getRoleNames()->first() ?? '-',
-                'tanggal' => $item->absensiJadwal->tanggal ?? '-',
-                'jamMasuk' => $item->absensiJadwal->jam_mulai ?? '-',
-                'jamPulang' => $item->absensiJadwal->jam_selesai ?? '-',
-                'status' => $item->status ?? 'Belum Absen',
-                'waktu_scan' => $item->waktu_scan,
-            ];
-        });
-
-        return response()->json([
-            'data' => $data,
-            'availableDates' => $availableDates
-        ], 200);
     }
 }

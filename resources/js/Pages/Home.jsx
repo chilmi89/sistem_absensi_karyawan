@@ -11,12 +11,12 @@ import HeaderDashboard from "@/Components/HeaderDashboard";
 export default function Home() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [jadwalAbsensiAdmin, setJadwalAbsensiAdmin] = useState([]);
-
-    // State untuk menyimpan semua hasil scan
     const [attendanceData, setAttendanceData] = useState([]);
     const [scanResult, setScanResult] = useState(null);
 
-    // Ambil data absensi user dan jadwal admin saat mount
+    const [selectedDate, setSelectedDate] = useState("");
+
+
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -40,13 +40,11 @@ export default function Home() {
     }, []);
 
 
-    // Callback dari CameraQR saat scan berhasil
     const handleScan = (data) => {
-        const d = data.data || data; // pastikan object hasil scan
+        const d = data.data || data;
         console.log("Hasil QR scan:", d);
 
-
-        // Simpan ke state attendanceData, replace jika id sama
+        
         setAttendanceData(prev => {
             const exists = prev.find(item => item.id === d.id);
             if (exists) {
@@ -60,7 +58,7 @@ export default function Home() {
     };
 
     return (
-        <MasterLayout >
+        <MasterLayout>
             <div className="px-6 pt-4 flex flex-col gap-6 min-h-[calc(100vh-4rem)]">
                 {/* Judul */}
                 <HeaderDashboard />
@@ -75,13 +73,23 @@ export default function Home() {
                         <AttendanceTable
                             data={attendanceData}
                             availableDates={jadwalAbsensiAdmin}
+                            onDateSelect={(date) => setSelectedDate(date)} // <-- tangkap tanggal
                         />
                     </div>
 
                     {/* CameraQR */}
                     <div className="col-span-1 md:col-span-4 flex flex-col items-stretch">
-                        <CameraQR height={280} onScan={handleScan} />
-                        {scanResult && (
+                        <CameraQR
+                            height={280}
+                            onScan={handleScan}
+                            selectedDate={selectedDate} // <-- teruskan tanggal
+                        />
+                        {!selectedDate && (
+                            <div className="text-yellow-400 mt-2 text-center">
+                                Pilih tanggal terlebih dahulu agar user bisa melakukan scan QR
+                            </div>
+                        )}
+                        {scanResult && selectedDate && (
                             <div className="text-gray-200 mt-2">
                                 Terakhir scan: {scanResult.nama || "Belum ada scan"}
                             </div>
@@ -90,6 +98,5 @@ export default function Home() {
                 </div>
             </div>
         </MasterLayout>
-
     );
 }
