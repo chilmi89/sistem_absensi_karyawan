@@ -1,31 +1,23 @@
+// React: JadwalTable.js (versi Notyf)
 import React, { useState } from "react";
 import { router, usePage } from "@inertiajs/react";
 import { route } from "ziggy-js";
 import { PencilIcon, TrashIcon, PlusIcon } from "@heroicons/react/24/solid";
 import JadwalModal from "./JadwalModal";
-import Swal from "sweetalert2";
+import { Notyf } from "notyf";
+import "notyf/notyf.min.css";
 import JudulPage from "./JudulPage";
 
 const JadwalTable = ({ jadwalAbsensi = [], onDataChange }) => {
+    const notyf = new Notyf(); // instance notyf
     const { auth } = usePage().props;
     const currentAdmin = auth.user;
 
-    const initialForm = {
-        id: null,
-        tanggal: "",
-        jam_mulai: "",
-        jam_selesai: "",
-        keterangan: "",
-    };
-
+    const initialForm = { id: null, tanggal: "", jam_mulai: "", jam_selesai: "", keterangan: "" };
     const [form, setForm] = useState(initialForm);
     const [isEditMode, setIsEditMode] = useState(false);
     const [showModal, setShowModal] = useState(false);
-
     const [searchTerm, setSearchTerm] = useState("");
-
-
-
 
     const openModal = (jadwal = null) => {
         if (jadwal) {
@@ -48,11 +40,7 @@ const JadwalTable = ({ jadwalAbsensi = [], onDataChange }) => {
         e.preventDefault();
 
         if (!form.tanggal || !form.jam_mulai || !form.jam_selesai) {
-            Swal.fire({
-                icon: "warning",
-                title: "Oops...",
-                text: "Tanggal, Jam Mulai, dan Jam Selesai wajib diisi!",
-            });
+            notyf.error("Tanggal, Jam Mulai, dan Jam Selesai wajib diisi!");
             return;
         }
 
@@ -67,35 +55,27 @@ const JadwalTable = ({ jadwalAbsensi = [], onDataChange }) => {
             onSuccess: (page) => {
                 closeModal();
                 onDataChange?.(page.props.jadwal);
-                Swal.fire({
-                    icon: "success",
-                    title: "Berhasil",
-                    text: `Jadwal ${isEditMode ? "diupdate" : "ditambahkan"}!`,
-                    timer: 1500,
-                    showConfirmButton: false,
-                });
+                notyf.success(`Jadwal ${isEditMode ? "diupdate" : "ditambahkan"}!`);
             },
             onError: () => {
-                Swal.fire({
-                    icon: "error",
-                    title: "Gagal",
-                    text: "Gagal menyimpan jadwal!",
-                });
+                notyf.error("Gagal menyimpan jadwal!");
             },
         });
     };
 
     const handleDelete = (id) => {
-        if (!confirm("Yakin ingin menghapus jadwal ini?")) return;
+        if (!window.confirm("Yakin ingin menghapus jadwal ini?")) return;
 
         router.visit(route("admin.jadwal.destroy", id), {
             method: "delete",
             preserveState: true,
-            onSuccess: (page) => onDataChange?.(page.props.jadwal),
-            onError: () => alert("Gagal hapus jadwal!"),
+            onSuccess: (page) => {
+                onDataChange?.(page.props.jadwal);
+                notyf.success("Jadwal berhasil dihapus!");
+            },
+            onError: () => notyf.error("Gagal hapus jadwal!"),
         });
     };
-
 
     const filteredJadwal = jadwalAbsensi.filter(jadwal =>
         jadwal.tanggal.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -105,32 +85,26 @@ const JadwalTable = ({ jadwalAbsensi = [], onDataChange }) => {
 
     return (
         <div className="flex flex-col items-center text-white mt-2">
-            {/* Tombol Tambah Jadwal + Search */}
-
-
             <div className="w-full max-w-4xl flex flex-col justify-between mb-4">
-                <div className="flex justify-start">
-                    <JudulPage />
-                </div>
+                <div className="flex justify-start"><JudulPage /></div>
                 <div className="flex justify-between items-center pt-4">
-                                    <input
-                    type="text"
-                    placeholder="Cari jadwal..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="py-2 rounded-lg min-w-[200px] h-[40px] text-gray-200 bg-slate-900"
-                />
-                <button
-                    onClick={() => openModal()}
-                    className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-5 py-3 rounded-lg transition text-base"
-                >
-                    <PlusIcon className="w-5 h-5" />
-                    Tambah Jadwal
-                </button>
+                    <input
+                        type="text"
+                        placeholder="Cari jadwal..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="py-2 rounded-lg min-w-[200px] h-[40px] text-gray-200 bg-slate-900"
+                    />
+                    <button
+                        onClick={() => openModal()}
+                        className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-5 py-3 rounded-lg transition text-base"
+                    >
+                        <PlusIcon className="w-5 h-5" />
+                        Tambah Jadwal
+                    </button>
                 </div>
             </div>
 
-            {/* Tabel Jadwal */}
             <div className="rounded-lg overflow-hidden w-full max-w-4xl shadow-lg">
                 <table className="w-full border-collapse text-center text-white text-base">
                     <thead>
@@ -193,7 +167,6 @@ const JadwalTable = ({ jadwalAbsensi = [], onDataChange }) => {
                 currentAdmin={currentAdmin}
             />
         </div>
-
     );
 };
 

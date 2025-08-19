@@ -12,7 +12,7 @@ export default function MasterLayout({ children }) {
             {/* Konten utama */}
             <main
                 className={`transition-all duration-300 flex-1 min-h-screen pt-16 bg-[#262B2C]/90 backdrop-blur-sm ${
-                    isSidebarOpen ? "pl-64" : "pl-0"
+                    isSidebarOpen ? "ml-64" : "ml-0"
                 }`}
             >
                 {children}

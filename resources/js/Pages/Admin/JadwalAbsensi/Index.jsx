@@ -38,9 +38,9 @@ export default function JadwalAbsensi() {
         <>
             <MasterLayout>
 
-                <div className="grid grid-cols-[auto_1fr] gap-4 pt-4 px-6">
+                <div className="grid grid-cols-[auto_1fr] gap-4 pt-4 px-5">
                     {/* Kolom pertama: kosong untuk sidebar / spasi */}
-                    <div className={`${isSidebarOpen ? "w-[110px]" : "w-0"}`}></div>
+                    <div className={`${isSidebarOpen ? "w-[50px]" : "w-0"}`}></div>
 
                     {/* Kolom kedua: Konten utama */}
                     <div className="flex flex-col gap-4">

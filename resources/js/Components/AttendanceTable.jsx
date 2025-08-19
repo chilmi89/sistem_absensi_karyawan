@@ -20,7 +20,7 @@ export default function AttendanceTable({ data = [], availableDates = [], onDate
     };
 
     return (
-        <div className="table-wrapper px-2 sm:px-6 md:px-6 bg-gray-900 ms-2 pb-10">
+        <div className="table-wrapper px-2 sm:px-6 md:px-6 bg-gray-900 ms-2 pb-10 p-3 rounded-lg">
             {/* Filter dan Action Buttons */}
             <div className="flex flex-col sm:flex-row justify-between items-center mb-4 px-2 gap-2">
                 <input
@@ -65,52 +65,54 @@ export default function AttendanceTable({ data = [], availableDates = [], onDate
 
             {/* Table */}
             <div className="rounded-lg overflow-hidden shadow-lg">
-                <table className="w-full text-white">
-                    <thead>
-                        <tr className="bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500">
-                            <th className="p-4 text-center">No</th>
-                            <th className="p-4 text-left">Nama</th>
-                            <th className="p-4 text-left">Divisi</th>
-                            <th className="p-4 text-center">Tanggal</th>
-                            <th className="p-4 text-center">Jam Masuk</th>
-                            <th className="p-4 text-center">Jam Pulang</th>
-                            <th className="p-4 text-center">Status Kehadiran</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {filteredData.length > 0 ? (
-                            filteredData.map((row, idx) => (
-                                <tr
-                                    key={row.id ?? `row-${idx}`}
-                                    className="bg-gray-900 hover:bg-blue-600/50 transition-colors duration-200"
-                                >
-                                    <td className="p-3 text-center">{idx + 1}</td>
-                                    <td className="p-3 text-left">{row.nama || "-"}</td>
-                                    <td className="p-3 text-left">{row.divisi || "-"}</td>
-                                    <td className="p-3 text-center">{row.tanggal || "-"}</td>
-                                    <td className="p-3 text-center">{row.jamMasuk || "-"}</td>
-                                    <td className="p-3 text-center">{row.jamPulang || "-"}</td>
-                                    <td className="p-3 text-center">
-                                        <span
-                                            className={`status-badge ${
-                                                row.status?.toLowerCase() || "alpa"
-                                            } px-2 py-1 rounded text-sm`}
-                                        >
-                                            {row.status || "Belum Absen"}
-                                        </span>
+                <div className="overflow-x-auto">
+                    <table className="w-full text-white table-fixed border-collapse">
+                        <thead>
+                            <tr className="bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500">
+                                <th className="p-4 text-center border border-gray-700">No</th>
+                                <th className="p-4 text-left border border-gray-700">Nama</th>
+                                <th className="p-4 text-left border border-gray-700">Divisi</th>
+                                <th className="p-4 text-center border border-gray-700">Tanggal</th>
+                                <th className="p-4 text-center border border-gray-700">Jam Masuk</th>
+                                <th className="p-4 text-center border border-gray-700">Jam Pulang</th>
+                                <th className="p-4 text-center border border-gray-700">Status Kehadiran</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {filteredData.length > 0 ? (
+                                filteredData.map((row, idx) => (
+                                    <tr
+                                        key={row.id ?? `row-${idx}`}
+                                        className="bg-gray-900 hover:bg-blue-600/50 transition-colors duration-200"
+                                    >
+                                        <td className="p-3 text-center border border-gray-700">{idx + 1}</td>
+                                        <td className="p-3 text-left border border-gray-700">{row.nama || "-"}</td>
+                                        <td className="p-3 text-left border border-gray-700">{row.divisi || "-"}</td>
+                                        <td className="p-3 text-center border border-gray-700">{row.tanggal || "-"}</td>
+                                        <td className="p-3 text-center border border-gray-700">{row.jamMasuk || "-"}</td>
+                                        <td className="p-3 text-center border border-gray-700">{row.jamPulang || "-"}</td>
+                                        <td className="p-3 text-center border border-gray-700">
+                                            <span
+                                                className={`status-badge ${row.status?.toLowerCase() || "alpa"
+                                                    } px-2 py-1 rounded text-sm`}
+                                            >
+                                                {row.status || "Belum Absen"}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan="7" className="p-4 text-gray-400 text-center bg-gray-900">
+                                        Tidak ada data
                                     </td>
                                 </tr>
-                            ))
-                        ) : (
-                            <tr>
-                                <td colSpan="7" className="p-4 text-gray-400 text-center bg-gray-900">
-                                    Tidak ada data
-                                </td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
             </div>
+
 
             {/* Info jika tanggal belum dipilih */}
             {!selectedDate && (

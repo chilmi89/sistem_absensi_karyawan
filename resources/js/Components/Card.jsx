@@ -1,25 +1,28 @@
 import { Users, UserCheck, Clock } from "lucide-react";
-import "@/../css/Card.css"; // CSS terpisah untuk efek animasi gradient
+import "@/../css/Card.css"; // CSS animasi gradient
 
-const cardData = [
-    { title: "Karyawan Hadir", value: 35, icon: UserCheck, gradient: "from-green-400 via-green-500 to-emerald-600" },
-    { title: "Jumlah Karyawan", value: 40, icon: Users, gradient: "from-blue-400 via-blue-500 to-indigo-600" },
-    { title: "Terlambat", value: 5, icon: Clock, gradient: "from-red-400 via-red-500 to-rose-600" },
-    { title: "Karyawan Belum Hadir", value: 5, icon: Clock, gradient: "from-orange-400 via-red-500 to-rose-600" },
-];
+export default function Card({ isSidebarOpen = false, sidebarWidth = 250, cardData = {} }) {
+    // Destructuring dengan default values
+    const { hadir = 0, jumlah = 0, terlambat = 0, belumHadir = 0 } = cardData;
 
-export default function Card({ isSidebarOpen = false, sidebarWidth = 250 }) {
+    const cards = [
+        { title: "Karyawan Hadir", value: hadir, icon: UserCheck, gradient: "from-green-400 via-green-500 to-emerald-600" },
+        { title: "Jumlah Karyawan", value: jumlah, icon: Users, gradient: "from-blue-400 via-blue-500 to-indigo-600" },
+        { title: "Terlambat", value: terlambat, icon: Clock, gradient: "from-red-400 via-red-500 to-rose-600" },
+        { title: "Karyawan Belum Hadir", value: belumHadir, icon: Clock, gradient: "from-orange-400 via-red-500 to-rose-600" },
+    ];
+
     return (
         <div
             className="w-full flex justify-center"
             style={{
-                marginLeft: isSidebarOpen ? `${sidebarWidth}px` : '0',
-                transition: 'margin-left 0.3s ease-in-out, width 0.3s ease-in-out',
+                marginLeft: isSidebarOpen ? `${sidebarWidth}px` : "0",
+                transition: "margin-left 0.3s ease-in-out, width 0.3s ease-in-out",
                 maxWidth: `calc(100% - ${isSidebarOpen ? sidebarWidth + 32 : 32}px)`,
             }}
         >
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full px-4">
-                {cardData.map((card, idx) => {
+                {cards.map((card, idx) => {
                     const Icon = card.icon;
                     return (
                         <div
@@ -42,31 +45,6 @@ export default function Card({ isSidebarOpen = false, sidebarWidth = 250 }) {
                     );
                 })}
             </div>
-            <style>{`
-                .card-animated {
-                    box-sizing: border-box;
-                    display: flex;
-                    align-items: center;
-                    justify-content: space-between;
-                    width: 100%;
-                    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
-                }
-                .grid {
-                    max-width: 100%;
-                    box-sizing: border-box;
-                }
-                @media (max-width: 640px) {
-                    .card-animated {
-                        min-height: 100px;
-                    }
-                    .card-animated h2 {
-                        font-size: 1rem;
-                    }
-                    .card-animated p {
-                        font-size: 2.5rem;
-                    }
-                }
-            `}</style>
         </div>
     );
 }

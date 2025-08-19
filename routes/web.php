@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AbsensiController;
 use App\Http\Controllers\CardController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\JadwalAbsensiController;
 use App\Http\Controllers\KaryawanController;
 
@@ -17,20 +18,25 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 // Redirect root (/) langsung ke /home, wajib login
 Route::get('/', function () {
-    return Inertia::render('Home');
+    return redirect()->route('dashboard.index');
 });
 // Home (auth)
-Route::get('/home', function () {
-    return Inertia::render('Home');
-})->middleware(['auth'])->name('Home');
 
-// Dashboard (auth + verified)
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+
+
+
+Route::middleware(['auth' , 'role:admin'])->group(function () {
+    Route::get('/home', [DashboardController::class, 'index'])->name('dashboard.index');
+    Route::get('/dashboard/card-data', [DashboardController::class, 'cardData'])->name('dashboard.card-data');
+
+});
 
 // Profile routes
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('/dashboard', function () {
+        return redirect()->route('dashboard.index');
+    })->name('dashboard');
+
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');

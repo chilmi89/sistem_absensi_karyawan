@@ -1,13 +1,14 @@
-// React: KaryawanTable.js
+// React: KaryawanTable.js (versi Notyf)
 import { useState, useEffect } from "react";
 import { router } from "@inertiajs/react";
 import { route } from "ziggy-js";
-import Swal from "sweetalert2";
+import { Notyf } from "notyf";
+import "notyf/notyf.min.css";
 import KaryawanModal from "./KaryawanModal";
-import { v4 as uuidv4 } from "uuid";
 import HeaderPersonality from "./HeaderPersonality";
 
 export default function KaryawanTable({ karyawan = {}, roles = [], filters = {} }) {
+    const notyf = new Notyf(); // instance notyf
     const [search, setSearch] = useState(filters?.search || "");
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isEditMode, setIsEditMode] = useState(false);
@@ -17,7 +18,7 @@ export default function KaryawanTable({ karyawan = {}, roles = [], filters = {} 
         jabatan: "",
         email: "",
         password: "",
-        qr_token: "" // simpan token backend
+        qr_token: ""
     });
     const [errors, setErrors] = useState({});
 
@@ -29,22 +30,13 @@ export default function KaryawanTable({ karyawan = {}, roles = [], filters = {} 
         return () => clearTimeout(delay);
     }, [search]);
 
-    // Tambah karyawan
     const handleAdd = () => {
-        setForm({
-            id: null,
-            nama: "",
-            jabatan: "",
-            email: "",
-            password: "",
-            qr_token: "" // kosongkan, backend yang generate
-        });
+        setForm({ id: null, nama: "", jabatan: "", email: "", password: "", qr_token: "" });
         setIsEditMode(false);
         setErrors({});
         setIsModalOpen(true);
     };
 
-    // Edit karyawan
     const handleEdit = (item) => {
         setForm({
             id: item.id,
@@ -52,7 +44,7 @@ export default function KaryawanTable({ karyawan = {}, roles = [], filters = {} 
             jabatan: item.roles?.[0]?.name || "",
             email: item.email,
             password: "",
-            qr_token: item.qr_token || "" // pakai token asli dari backend
+            qr_token: item.qr_token || ""
         });
         setIsEditMode(true);
         setErrors({});
@@ -60,20 +52,13 @@ export default function KaryawanTable({ karyawan = {}, roles = [], filters = {} 
     };
 
     const handleDelete = (id) => {
-        Swal.fire({
-            title: "Hapus data ini?",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonText: "Ya, hapus",
-            cancelButtonText: "Batal"
-        }).then((result) => {
-            if (result.isConfirmed) {
-                router.delete(route("karyawan.destroy", id), {
-                    preserveScroll: true,
-                    onSuccess: () => Swal.fire("Berhasil", "Data dihapus", "success"),
-                    onError: () => Swal.fire("Gagal", "Tidak bisa menghapus", "error")
-                });
-            }
+        // konfirmasi hapus pakai modal React / window.confirm (lebih ringan)
+        if (!window.confirm("Hapus data ini?")) return;
+
+        router.delete(route("karyawan.destroy", id), {
+            preserveScroll: true,
+            onSuccess: () => notyf.success("Data berhasil dihapus"),
+            onError: () => notyf.error("Gagal menghapus data")
         });
     };
 
@@ -84,7 +69,7 @@ export default function KaryawanTable({ karyawan = {}, roles = [], filters = {} 
             jabatan: form.jabatan,
             email: form.email,
             ...(form.password ? { password: form.password } : {}),
-            qr_token: form.qr_token // selalu kirim token backend
+            qr_token: form.qr_token
         };
 
         const method = isEditMode ? "put" : "post";
@@ -93,23 +78,20 @@ export default function KaryawanTable({ karyawan = {}, roles = [], filters = {} 
         router[method](url, payload, {
             preserveScroll: true,
             onSuccess: (res) => {
-                Swal.fire(
-                    "Berhasil",
-                    isEditMode ? "Data diubah" : "Data ditambahkan",
-                    "success"
-                );
+                notyf.success(isEditMode ? "Data berhasil diubah" : "Data berhasil ditambahkan");
                 setIsModalOpen(false);
-                // Update form dengan qr_token terbaru dari backend
+
                 if (res?.props?.karyawan?.qr_token) {
                     setForm((prev) => ({ ...prev, qr_token: res.props.karyawan.qr_token }));
                 }
+
                 router.visit(route("karyawan.index"), { replace: true, preserveScroll: true });
             },
             onError: (err) => {
                 if (err?.response?.data?.errors) {
                     setErrors(err.response.data.errors);
                 } else {
-                    Swal.fire("Gagal", "Terjadi kesalahan saat menyimpan", "error");
+                    notyf.error("Terjadi kesalahan saat menyimpan");
                 }
             }
         });
